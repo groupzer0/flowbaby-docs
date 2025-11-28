@@ -1,0 +1,68 @@
+name: Sync README from flowbaby
+
+on:
+  # Run manually from Actions tab
+  workflow_dispatch:
+  
+  # Run on schedule (daily at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # Or trigger via repository_dispatch from flowbaby repo
+  repository_dispatch:
+    types: [readme-updated]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout flowbaby-docs
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Fetch README from flowbaby
+        run: |
+          curl -s https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/README.md -o /tmp/README.md
+          
+      - name: Transform README for Docusaurus
+        run: |
+          # Add Docusaurus frontmatter and transform content
+          cat > docs/intro.md << 'FRONTMATTER'
+          ---
+          sidebar_position: 1
+          slug: /
+          ---
+          
+          FRONTMATTER
+          
+          # Remove the first H1 line (we'll use our own title)
+          # and append the rest of the README
+          tail -n +2 /tmp/README.md >> docs/intro.md
+          
+          # Fix relative links that point to extension repo files
+          sed -i 's|\](\.\.\/|\](https://github.com/lsalsich/flowbaby/blob/main/|g' docs/intro.md
+          sed -i 's|\](\.\/AGENT_INTEGRATION|\](https://github.com/lsalsich/flowbaby/blob/main/extension/AGENT_INTEGRATION|g' docs/intro.md
+          sed -i 's|\](\.\/bridge/|\](https://github.com/lsalsich/flowbaby/blob/main/extension/bridge/|g' docs/intro.md
+          sed -i 's|\](CHANGELOG\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/CHANGELOG.md|g' docs/intro.md
+          sed -i 's|\](SETUP\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/SETUP.md|g' docs/intro.md
+          sed -i 's|\](LICENSE|\](https://github.com/lsalsich/flowbaby/blob/main/LICENSE|g' docs/intro.md
+          
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet docs/intro.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/intro.md
+          git commit -m "Sync README from flowbaby repo"
+          git push
