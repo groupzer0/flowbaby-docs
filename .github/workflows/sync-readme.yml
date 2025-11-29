@@ -36,6 +36,8 @@ jobs:
             https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/AGENT_INTEGRATION.md -o /tmp/AGENT_INTEGRATION.md
           curl -s -H "Authorization: token $GH_TOKEN" \
             https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/CHANGELOG.md -o /tmp/CHANGELOG.md
+          curl -s -H "Authorization: token $GH_TOKEN" \
+            https://raw.githubusercontent.com/lsalsich/flowbaby/main/THIRD_PARTY_NOTICES.md -o /tmp/THIRD_PARTY_NOTICES.md
           
           # Fetch all media/images from private repo using GitHub API
           mkdir -p static/img/flowbaby
@@ -153,6 +155,21 @@ jobs:
           
           # Use the dedicated CHANGELOG.md file
           cat /tmp/CHANGELOG.md >> docs/changelog.md
+
+      - name: Create third-party-notices.md
+        run: |
+          mkdir -p docs
+          cat > docs/third-party-notices.md << 'EOF'
+          ---
+          sidebar_position: 8
+          ---
+
+          # Third Party Notices
+
+          EOF
+
+          # Use the dedicated THIRD_PARTY_NOTICES.md file
+          cat /tmp/THIRD_PARTY_NOTICES.md >> docs/third-party-notices.md
           
       - name: Fix relative links in all docs
         run: |
@@ -164,6 +181,8 @@ jobs:
             sed -i 's|\](CHANGELOG\.md|\](./changelog|g' "$file"
             sed -i 's|\](SETUP\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/SETUP.md|g' "$file"
             sed -i 's|\](LICENSE|\](https://github.com/lsalsich/flowbaby/blob/main/LICENSE|g' "$file"
+            # Point THIRD_PARTY_NOTICES.md links at the local third-party-notices doc
+            sed -i 's|\](THIRD_PARTY_NOTICES\.md|\](./third-party-notices|g' "$file"
             
             # Fix image links to point to local static folder (handles both relative and absolute URLs)
             sed -i 's|\](media/|\](/img/flowbaby/|g' "$file"
@@ -173,6 +192,14 @@ jobs:
             sed -i 's/^> \*\*Note\*\*:/:::note/g' "$file"
             sed -i 's/^> \*\*Warning\*\*:/:::warning/g' "$file"
             sed -i 's/^> \*\*Tip\*\*:/:::tip/g' "$file"
+          done
+
+      - name: Escape MDX-unsafe less-than patterns
+        run: |
+          for file in docs/*.md; do
+            # Escape "<" immediately followed by a digit, e.g. <10s, <1000ms, <5 minutes
+            # to prevent MDX from treating them as JSX while leaving real tags like <b> alone.
+            perl -pi -e 's/<(\d)/&lt;$1/g' "$file"
           done
           
       - name: Check for changes

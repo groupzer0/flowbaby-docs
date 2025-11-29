@@ -597,7 +597,7 @@ All features, improvements, and technical details remain as documented in v0.3.3
 
 ### Added - Plan 017: Async cognify() Optimization
 
-**Universal Async Memory Ingestion** - ALL ingestion flows (agent tools, manual capture, headless commands) now return in <10 seconds:
+**Universal Async Memory Ingestion** - ALL ingestion flows (agent tools, manual capture, headless commands) now return in &lt;10 seconds:
 
 - **Staged Messaging**: Every ingestion surface shows: "Memory staged – processing will finish in ~1–2 minutes. You'll get a notification when it's done."
 - **Background Processing**: Knowledge graph construction (`cognee.cognify()`) runs in detached subprocess while agents continue working
@@ -609,7 +609,7 @@ All features, improvements, and technical details remain as documented in v0.3.3
 
 **Technical Implementation**:
 
-- Split `ingest.py` into 3 modes: `--mode sync` (diagnostic), `--mode add-only` (fast staging <10s), `--mode cognify-only` (background graph construction)
+- Split `ingest.py` into 3 modes: `--mode sync` (diagnostic), `--mode add-only` (fast staging &lt;10s), `--mode cognify-only` (background graph construction)
 - BackgroundOperationManager service with:
   - Dual-ledger persistence (`.flowbaby/background_ops.json` + VS Code globalState)
   - Concurrency limits: max 2 concurrent + FIFO queue of 3 pending operations
@@ -622,8 +622,8 @@ All features, improvements, and technical details remain as documented in v0.3.3
 
 **Performance Impact**:
 
-- Agent blocking time: **73s → <10s (86% reduction)**
-- Manual capture blocking time: **73s → <10s (86% reduction)**
+- Agent blocking time: **73s → &lt;10s (86% reduction)**
+- Manual capture blocking time: **73s → &lt;10s (86% reduction)**
 - Background processing: 60-90s (unchanged, runs asynchronously)
 - **Result**: Agents can store 3 memories in 30s instead of 219s
 
@@ -932,7 +932,7 @@ All features, improvements, and technical details remain as documented in v0.3.3
 - **Enhanced Error Messages**: Python errors (missing packages, API key issues) now visible in Output Channel with actionable troubleshooting hints
 - **Workspace-Relative Execution**: Bridge scripts run from workspace context for reliable path resolution
 - **Context Display**: Retrieved memories formatted with clear markdown previews ("📚 Retrieved N memories")
-- **Performance Logging**: Retrieval timing logged to Output Channel for monitoring (<1000ms P95 target)
+- **Performance Logging**: Retrieval timing logged to Output Channel for monitoring (&lt;1000ms P95 target)
 - Error logs sanitize sensitive data (API keys, tokens) before display
 - Configuration documentation clarifies when manual Python path setting is needed
 - Structured error extraction from Python subprocess stdout

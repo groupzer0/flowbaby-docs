@@ -12,16 +12,16 @@ Flowbaby automatically captures and summarizes key moments from your GitHub Copi
 ## Features
 
 - **Context aware automatic memory search** - Flowbaby is configured to use chat conversation cues to search memory and add that memory context to the chat - keeping your Copilot agent from drifting and saving you from having to explain what happened all over again. 
-![Screenshot](/img/flowbaby/auto-search.png)
+-![Screenshot](/img/flowbaby/auto-search.png)
 - **Context aware automatic memory storage** - Flowbaby knows when it's a good time to summarize and store memories based on the chat context. 
-![Screenshot](/img/flowbaby/auto-store.png)
+-![Screenshot](/img/flowbaby/auto-store.png)
 - **@flowbaby chat participant** – A dedicated Copilot participant that recalls past conversations and surfaces relevant memories into new chats to reduce drift over long sessions.
-![Screenshot](/img/flowbaby/interactive-chat-participant.png)
+-![Screenshot](/img/flowbaby/interactive-chat-participant.png)
 - **Configurable memory behavior via stored prompts** – Guide Flowbaby with stored natural-language instructions (e.g., what to store, what to ignore, how aggressively to retrieve) so each workspace can have its own memory style.
 - **Agent tools for storage and retrieval** – Exposes two standard Copilot tools (for storing and retrieving memories) that are available to GitHub Copilot just like any other tool, so agents can autonomously call them when helpful.
 - **Keyboard Shortcut Workflow** – Press Ctrl+Alt+F / Cmd+Alt+F to capture important snippets from chat or code with a quick confirmation flow.
 - **Command Palette Alternative** – Run “Flowbaby: Capture to Memory” if you prefer command-palette based capture.
-![Screenshot](/img/flowbaby/manual-store-summary.png)
+-![Screenshot](/img/flowbaby/manual-store-summary.png)
 - **Workspace Isolation** – Each workspace has its own separate memory and Python environment—no cross-project leakage.
 - **Hybrid Graph-Vector Search** – Combines knowledge-graph structure with vector similarity for higher-quality, controllable retrieval.
 - **Privacy-First Design** – All data stays on your machine; only chat content already sent to GitHub Copilot is summarized, and no repository files or file content are sent to any external LLM.
@@ -103,8 +103,8 @@ Flowbaby includes tools to keep your environment healthy:
 Starting in v0.3.3, memory ingestion operates asynchronously to prevent blocking your workflow. Here's what to expect:
 
 **Timing Expectations**:
-- **Capture Response**: 5-10 seconds—you can continue working immediately after capture
-- **Background Processing**: 60-90 seconds—knowledge graph construction happens in the background
+- **Capture Response**: 5–10 seconds—you can continue working immediately after capture
+- **Background Processing**: 60–90 seconds—knowledge graph construction happens in the background
 - **Total Time**: ~1-2 minutes from capture to searchable memory
 
 **Staged Messaging**:
@@ -129,7 +129,8 @@ After background processing finishes, you'll receive one of two notifications:
 **Why Async?**
 
 Previously, memory capture blocked for 60-90 seconds while the knowledge graph was being built. This made agents unresponsive and disrupted your workflow. With async ingestion:
-- Agents return responses in <10 seconds
+
+- Agents return responses in &lt;10 seconds
 - You can store multiple memories without waiting
 - Background processing doesn't interrupt your work
 - You're only notified if there's an error

@@ -21,8 +21,9 @@ Flowbaby includes tools to keep your environment healthy:
 Starting in v0.3.3, memory ingestion operates asynchronously to prevent blocking your workflow. Here's what to expect:
 
 **Timing Expectations**:
-- **Capture Response**: 5-10 seconds—you can continue working immediately after capture
-- **Background Processing**: 60-90 seconds—knowledge graph construction happens in the background
+
+- **Capture Response**: 5–10 seconds—you can continue working immediately after capture
+- **Background Processing**: 60–90 seconds—knowledge graph construction happens in the background
 - **Total Time**: ~1-2 minutes from capture to searchable memory
 
 **Staged Messaging**:
@@ -47,10 +48,11 @@ After background processing finishes, you'll receive one of two notifications:
 **Why Async?**
 
 Previously, memory capture blocked for 60-90 seconds while the knowledge graph was being built. This made agents unresponsive and disrupted your workflow. With async ingestion:
-- Agents return responses in <10 seconds
+
+- Agents return responses in &lt;10 seconds
 - You can store multiple memories without waiting
 - Background processing doesn't interrupt your work
-- You're only notified if there's an error
+- Background processing doesn't interrupt your work
 
 **Background Status**:
 
