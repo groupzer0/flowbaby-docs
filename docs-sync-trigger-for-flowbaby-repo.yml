@@ -1,8 +1,8 @@
 # Add this workflow to the flowbaby repo at:
 # .github/workflows/trigger-docs-sync.yml
 #
-# This triggers the flowbaby-docs repo to sync the README
-# whenever the extension README is updated.
+# This triggers the flowbaby-docs repo to sync docs
+# whenever documentation files are updated.
 
 name: Trigger Docs Sync
 
@@ -10,6 +10,8 @@ on:
   push:
     paths:
       - 'extension/README.md'
+      - 'extension/AGENT_INTEGRATION.md'
+      - 'extension/CHANGELOG.md'
     branches:
       - main
 
@@ -23,4 +25,4 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.DOCS_SYNC_TOKEN }}" \
             https://api.github.com/repos/lsalsich/flowbaby-docs/dispatches \
-            -d '{"event_type":"readme-updated"}'
+            -d '{"event_type":"docs-updated"}'

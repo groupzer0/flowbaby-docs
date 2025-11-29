@@ -1,4 +1,4 @@
-name: Sync README from flowbaby
+name: Sync Docs from flowbaby
 
 on:
   # Run manually from Actions tab
@@ -10,7 +10,7 @@ on:
   
   # Or trigger via repository_dispatch from flowbaby repo
   repository_dispatch:
-    types: [readme-updated]
+    types: [docs-updated]
 
 jobs:
   sync:
@@ -22,40 +22,144 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Fetch README from flowbaby
+      - name: Fetch docs from flowbaby
         run: |
+          # Fetch README and AGENT_INTEGRATION from flowbaby repo
           curl -s https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/README.md -o /tmp/README.md
+          curl -s https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/AGENT_INTEGRATION.md -o /tmp/AGENT_INTEGRATION.md
+          curl -s https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/CHANGELOG.md -o /tmp/CHANGELOG.md
           
-      - name: Transform README for Docusaurus
+      - name: Create intro.md from README
         run: |
-          # Add Docusaurus frontmatter and transform content
-          cat > docs/intro.md << 'FRONTMATTER'
+          cat > docs/intro.md << 'EOF'
           ---
           sidebar_position: 1
           slug: /
           ---
+
+          EOF
           
-          FRONTMATTER
+          # Get content starting from the first heading
+          cat /tmp/README.md >> docs/intro.md
           
-          # Remove the first H1 line (we'll use our own title)
-          # and append the rest of the README
-          tail -n +2 /tmp/README.md >> docs/intro.md
+      - name: Create getting-started.md
+        run: |
+          cat > docs/getting-started.md << 'EOF'
+          ---
+          sidebar_position: 2
+          ---
+
+          # Getting Started
+
+          This guide will help you install and configure Flowbaby for your VS Code workspace.
+
+          EOF
           
-          # Fix relative links that point to extension repo files
-          sed -i 's|\](\.\.\/|\](https://github.com/lsalsich/flowbaby/blob/main/|g' docs/intro.md
-          sed -i 's|\](\.\/AGENT_INTEGRATION|\](https://github.com/lsalsich/flowbaby/blob/main/extension/AGENT_INTEGRATION|g' docs/intro.md
-          sed -i 's|\](\.\/bridge/|\](https://github.com/lsalsich/flowbaby/blob/main/extension/bridge/|g' docs/intro.md
-          sed -i 's|\](CHANGELOG\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/CHANGELOG.md|g' docs/intro.md
-          sed -i 's|\](SETUP\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/SETUP.md|g' docs/intro.md
-          sed -i 's|\](LICENSE|\](https://github.com/lsalsich/flowbaby/blob/main/LICENSE|g' docs/intro.md
+          # Extract Installation and Setup sections from README
+          sed -n '/^## Installation$/,/^## Usage$/p' /tmp/README.md | head -n -2 >> docs/getting-started.md
+          sed -n '/^## Setup$/,/^## Usage$/p' /tmp/README.md | head -n -2 >> docs/getting-started.md
+          
+      - name: Create configuration.md
+        run: |
+          cat > docs/configuration.md << 'EOF'
+          ---
+          sidebar_position: 3
+          ---
+
+          # Configuration
+
+          Customize Flowbaby's behavior through VS Code settings.
+
+          EOF
+          
+          # Extract Configuration and Python Environment sections
+          sed -n '/^### Configuration$/,/^### LLM Configuration$/p' /tmp/README.md | tail -n +2 | head -n -2 >> docs/configuration.md
+          sed -n '/^### LLM Configuration$/,/^## Python Environment$/p' /tmp/README.md | head -n -2 >> docs/configuration.md
+          sed -n '/^## Python Environment$/,/^## Using Flowbaby/p' /tmp/README.md | head -n -2 >> docs/configuration.md
+          
+      - name: Create workflows.md
+        run: |
+          cat > docs/workflows.md << 'EOF'
+          ---
+          sidebar_position: 4
+          ---
+
+          # Workflows
+
+          Learn effective patterns for using Flowbaby in your daily development.
+
+          EOF
+          
+          # Extract Usage, Capturing, Retrieving, Summary sections
+          sed -n '/^## Usage$/,/^## For Agent Developers$/p' /tmp/README.md | head -n -2 >> docs/workflows.md
+          
+      - name: Create agent-integration.md
+        run: |
+          cat > docs/agent-integration.md << 'EOF'
+          ---
+          sidebar_position: 5
+          ---
+
+          EOF
+          
+          # Use the dedicated AGENT_INTEGRATION.md file
+          cat /tmp/AGENT_INTEGRATION.md >> docs/agent-integration.md
+          
+      - name: Create troubleshooting.md
+        run: |
+          cat > docs/troubleshooting.md << 'EOF'
+          ---
+          sidebar_position: 6
+          ---
+
+          # Troubleshooting
+
+          Common issues and solutions for Flowbaby.
+
+          EOF
+          
+          # Extract Troubleshooting, Known Limitations, Known Issues sections
+          sed -n '/^## Troubleshooting$/,/^## Screenshots$/p' /tmp/README.md | tail -n +2 | head -n -2 >> docs/troubleshooting.md
+          
+      - name: Create changelog.md
+        run: |
+          cat > docs/changelog.md << 'EOF'
+          ---
+          sidebar_position: 7
+          ---
+
+          EOF
+          
+          # Use the dedicated CHANGELOG.md file
+          cat /tmp/CHANGELOG.md >> docs/changelog.md
+          
+      - name: Fix relative links in all docs
+        run: |
+          for file in docs/*.md; do
+            # Fix relative links to point to GitHub
+            sed -i 's|\](\.\.\/|\](https://github.com/lsalsich/flowbaby/blob/main/|g' "$file"
+            sed -i 's|\](\.\/AGENT_INTEGRATION|\](./agent-integration|g' "$file"
+            sed -i 's|\](\.\/bridge/|\](https://github.com/lsalsich/flowbaby/blob/main/extension/bridge/|g' "$file"
+            sed -i 's|\](CHANGELOG\.md|\](./changelog|g' "$file"
+            sed -i 's|\](SETUP\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/SETUP.md|g' "$file"
+            sed -i 's|\](LICENSE|\](https://github.com/lsalsich/flowbaby/blob/main/LICENSE|g' "$file"
+            sed -i 's|\](media/|\](https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/media/|g' "$file"
+            
+            # Convert GitHub-style notes to Docusaurus admonitions
+            sed -i 's/^> \*\*Note\*\*:/:::note/g' "$file"
+            sed -i 's/^> \*\*Warning\*\*:/:::warning/g' "$file"
+            sed -i 's/^> \*\*Tip\*\*:/:::tip/g' "$file"
+          done
           
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet docs/intro.md; then
+          if git diff --quiet docs/; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Files changed:"
+            git diff --name-only docs/
           fi
           
       - name: Commit and push
@@ -63,6 +167,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/intro.md
-          git commit -m "Sync README from flowbaby repo"
+          git add docs/
+          git commit -m "Sync docs from flowbaby repo
+
+          Auto-generated from:
+          - extension/README.md
+          - extension/AGENT_INTEGRATION.md  
+          - extension/CHANGELOG.md"
           git push
