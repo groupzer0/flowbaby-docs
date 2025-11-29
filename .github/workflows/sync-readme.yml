@@ -37,6 +37,19 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" \
             https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/CHANGELOG.md -o /tmp/CHANGELOG.md
           
+          # Fetch all media/images from private repo using GitHub API
+          mkdir -p static/img/flowbaby
+          
+          # Get list of files in media directory
+          curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/lsalsich/flowbaby/contents/extension/media" | \
+            jq -r '.[] | select(.type == "file") | .name' | while read img; do
+              echo "Fetching $img..."
+              curl -s -H "Authorization: token $GH_TOKEN" \
+                "https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/media/$img" \
+                -o "static/img/flowbaby/$img"
+            done
+          
       - name: Create intro.md from README
         run: |
           cat > docs/intro.md << 'EOF'
@@ -151,7 +164,10 @@ jobs:
             sed -i 's|\](CHANGELOG\.md|\](./changelog|g' "$file"
             sed -i 's|\](SETUP\.md|\](https://github.com/lsalsich/flowbaby/blob/main/extension/SETUP.md|g' "$file"
             sed -i 's|\](LICENSE|\](https://github.com/lsalsich/flowbaby/blob/main/LICENSE|g' "$file"
-            sed -i 's|\](media/|\](https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/media/|g' "$file"
+            
+            # Fix image links to point to local static folder
+            sed -i 's|\](media/|\](/img/flowbaby/|g' "$file"
+            sed -i 's|https://raw.githubusercontent.com/lsalsich/flowbaby/main/extension/media/|/img/flowbaby/|g' "$file"
             
             # Convert GitHub-style notes to Docusaurus admonitions
             sed -i 's/^> \*\*Note\*\*:/:::note/g' "$file"
@@ -162,12 +178,12 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet docs/; then
+          if git diff --quiet docs/ && git diff --quiet static/img/flowbaby/; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "Files changed:"
-            git diff --name-only docs/
+            git diff --name-only docs/ static/img/flowbaby/
           fi
           
       - name: Commit and push
@@ -175,11 +191,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/
+          git add docs/ static/img/flowbaby/
           git commit -m "Sync docs from flowbaby repo
 
           Auto-generated from:
           - extension/README.md
           - extension/AGENT_INTEGRATION.md  
-          - extension/CHANGELOG.md"
+          - extension/CHANGELOG.md
+          - extension/media/*"
           git push
