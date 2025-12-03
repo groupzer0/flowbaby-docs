@@ -62,18 +62,8 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 2. Type `@flowbaby` in chat to invoke the participant explicitly
 3. Check Output Channel logs for retrieval attempts and timing
 4. Remember: The first conversation in a new workspace has no context (memory starts empty)
-5. Each workspace has separate memory—switching workspaces means different context
+5. Each workspace has separate memory-switching workspaces means different context
 6. If retrieval fails, you'll see "⚠️ Memory retrieval unavailable" but participant continues without context
-
-### Common Error Patterns
-
-| Symptom | Likely Cause | Recommended Action |
-|---------|--------------|-------------------|
-| "Python script exited with code 1" (empty stderr) | Interpreter mismatch: `cognee` or `python-dotenv` not installed in detected Python environment | Set `Flowbaby.pythonPath` in VS Code settings to correct interpreter (Linux/macOS: `.venv/bin/python`, Windows: `.venv\Scripts\python.exe`) |
-| "No module named 'cognee'" | Missing `cognee` package in Python environment | Run **"Flowbaby: Initialize Workspace"** to set up environment automatically |
-| "LLM_API_KEY not found" | Missing API key in `.env` file or environment | Create `.env` file in workspace root with valid `LLM_API_KEY`, then reload window |
-| Script timeout (retrieval: 15s, ingestion: 120s) | Network issues, slow LLM provider, or filesystem delay | Ingestion timeout is generous (120s); if timeout occurs but data appears via @flowbaby, ingestion succeeded in background. Check Output Channel for timing metrics. |
-| JSON parse error in logs | Script produced non-JSON output | Report as bug. Check for conflicting print statements in bridge scripts. |
 
 **Note**: Auto-detection works for standard `.venv` setups on Linux, macOS, and Windows. For remote contexts (Remote-SSH, WSL, Dev Containers), conda, or pyenv, use explicit `Flowbaby.pythonPath` configuration.
 

@@ -11,6 +11,211 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- markdownlint-disable MD022 MD024 MD032 MD007 MD009 -->
 
+## [0.5.13] - 2025-12-03
+
+### Changed - Maintenance Release
+
+- Version bump only to align with latest internal planning and release numbering. No user-visible functionality changes beyond those already included in 0.5.12.
+
+## [0.5.12] - 2025-12-03
+
+### Fixed - Windows Installation and Stability
+
+**Windows Support Release** - Resolves remaining Windows installation issues and makes the bridge fully reliable on Windows.
+
+#### Improvements
+- **Background Ingestion on Windows**: Switched background ingestion to use `pythonw.exe` when available, preventing stray console windows and improving stability for long-running operations.
+- **Initialization Race Fix**: Resolved a fresh workspace initialization race on Windows, ensuring the bridge environment and Kuzu databases are fully ready before marking setup as complete.
+- **Kuzu and DLL Handling**: Added targeted Windows Kuzu tests and fixed Python detection / Kuzu DLL load issues, resulting in the first fully working end-to-end Windows configuration.
+- **Platform Prerequisites**: Updated documentation to call out the Visual C++ Redistributable requirement on Windows, reducing installation surprises.
+
+## [0.5.11] - 2025-12-01
+
+### Added - Plan 047: Enhanced Setup Diagnostics
+
+**Diagnostics Release** - Improves troubleshooting for environment setup failures by exposing detailed command execution logs and system errors.
+
+#### Improvements
+- **Command Transparency**: Setup logs now show the exact command, arguments, and working directory for every subprocess execution.
+- **System Error Codes**: Failures now report specific Node.js system error codes (e.g., `ENOENT`, `EACCES`) instead of generic messages.
+- **Full Stack Traces**: Error logs include full stack traces to pinpoint the exact failure location in the code.
+- **Automatic Log Focus**: The Flowbaby Output Channel is automatically revealed when a setup error occurs, ensuring immediate visibility of diagnostic information.
+- **Captured Output**: Standard output from failed commands (which was previously swallowed) is now included in the error logs.
+
+#### Windows Reliability Improvements
+- **Background Ingestion on Windows**: Switched background ingestion to use `pythonw.exe` when available, preventing stray console windows and improving stability for long-running operations.
+- **Initialization Race Fix**: Resolved a fresh workspace initialization race on Windows, ensuring the bridge environment and Kuzu databases are fully ready before marking setup as complete.
+- **Kuzu and DLL Handling**: Added targeted Windows Kuzu tests and fixed Python detection / Kuzu DLL load issues, resulting in the first fully working end-to-end Windows configuration.
+- **Platform Prerequisites**: Updated documentation to call out the Visual C++ Redistributable requirement on Windows, reducing installation surprises.
+
+## [0.5.10] - 2025-02-18
+
+### Fixed - Plan 046: Windows Spawn Fix
+
+**Hotfix Release** - Resolves "Environment creation failed" error on Windows when workspace path contains spaces.
+
+#### Issues Resolved
+- **Environment Creation Failure**: Fixed a regression in v0.5.9 where `Flowbaby: Initialize Workspace` failed immediately on Windows if the path contained spaces.
+- **Root Cause**: The manual quoting logic introduced in v0.5.9 conflicted with `spawn`'s `shell: true` behavior on Windows, leading to malformed commands.
+- **Fix**: Switched `FlowbabySetupService.runCommand` to use `shell: false`, allowing Node.js to handle argument escaping natively and robustly across all platforms.
+
+#### Technical Changes
+- **FlowbabySetupService**: Removed `quoteIfNecessary` helper and manual quoting.
+- **Spawn Options**: Changed `shell: true` to `shell: false` for `python` and `pip` commands.
+- **Verification**: Confirmed that `FlowbabyClient` already uses `shell: false` and was unaffected.
+
+## [0.5.9] - 2025-12-01
+
+### Fixed - Plan 022: Windows Path Spaces Fix
+
+**Critical Fix** - Resolves environment creation failures on Windows when the workspace path contains spaces.
+
+#### Issues Resolved
+- **Environment Creation Failure**: Fixed a bug where `Flowbaby: Initialize Workspace` would fail or create stray folders if the workspace path contained spaces (e.g., `C:\Users\My Name\Project`).
+- **Root Cause**: Node.js `spawn` with `shell: true` does not automatically quote arguments on Windows, causing paths with spaces to be split into multiple arguments.
+- **Fix**: Implemented robust quoting logic in `FlowbabySetupService` to ensure both the command and arguments are correctly quoted when they contain spaces.
+
+#### Technical Changes
+- **FlowbabySetupService**: Added `quoteIfNecessary` helper in `runCommand` to wrap paths in double quotes if they contain spaces and aren't already quoted.
+- **Cross-Platform Safety**: Verified that the quoting logic is safe for Windows (`cmd.exe`) and Unix-like systems (`/bin/sh`), ensuring no regressions on macOS/Linux.
+- **Test Coverage**: Added unit tests to `FlowbabySetupService.test.ts` to verify that commands and arguments are correctly quoted before being passed to `spawn`.
+
+## [0.5.8] - 2025-11-30
+
+### Fixed - Hotfix: Fresh Workspace Memory Operations
+
+**Hotfix Release** - Fixes issues discovered when using memory tools on fresh workspaces without stored data.
+
+#### Issues Resolved
+
+1. **DatasetNotFoundError on fresh workspace retrieval**: When querying `@flowbaby` or using `flowbaby_retrieveMemory` on a fresh workspace with no stored memories, the extension now gracefully returns empty results instead of throwing `DatasetNotFoundError: No datasets found`. This is the expected UX - the workspace simply has no memories yet.
+
+2. **BackgroundOperationManager not initialized error**: When using `flowbaby_storeMemory` tool before full workspace setup, the extension now shows a helpful prompt to initialize the workspace instead of failing with a confusing "BackgroundOperationManager not initialized" error.
+
+3. **Misleading success log on staging failure**: The "✅ Memory staged" log message now only appears when staging actually succeeds. Previously it showed success before checking the result, then showed failure notification.
+
+#### Technical Changes
+
+##### Python Bridge (`retrieve.py`)
+- **Added**: Detection for `DatasetNotFoundError` in search exception handler
+- **Behavior**: Fresh workspaces with no data return `{"success": true, "results": [], "message": "No data has been ingested yet"}`
+
+##### Agent Commands (`ingestForAgent.ts`)
+- **Added**: Try-catch wrapper around `BackgroundOperationManager.getInstance()` call
+- **Behavior**: Returns helpful `NOT_INITIALIZED` error with "Initialize Now" action button
+- **UX**: User sees clear path to fix instead of cryptic error
+
+##### Store Memory Tool (`storeMemoryTool.ts`)
+- **Fixed**: Success log message now appears after response check, not before
+- **Fixed**: Failure log includes actual error message from response
+
+## [0.5.7] - 2025-11-30
+
+### Fixed - Hotfix: Smoke Test Issues from v0.5.6
+
+**Hotfix Release** - Addresses five UX issues discovered during v0.5.6 smoke testing.
+
+#### Issues Resolved
+
+1. **Ingestion failure notifications not showing**: Failed memory ingestions via `flowbaby_storeMemory` tool now show warning toast with "View Logs" option. (Note: success notifications can be disabled via `flowbaby.notifications.showIngestionSuccess`, but failure notifications always show.)
+
+2. **Chat participant icon missing**: `@flowbaby` icon now displays correctly in chat. Fixed icon path from non-existent `icon.png` to actual `flowbaby-icon-tightcrop.png`.
+
+3. **Missing API key causes infinite "working..." state**: When API key is not configured, `@flowbaby` chat now shows helpful error message with link to configure instead of hanging indefinitely.
+
+4. **API key setup notice auto-dismissing**: Post-initialization API key prompt now uses modal dialog that stays until user explicitly dismisses it.
+
+5. **Status bar not updating after API key config**: After setting API key via command, status bar now updates from yellow "API Key Required" to green "Ready" state.
+
+#### Technical Changes
+
+- Added failure notification to `StoreMemoryTool.invoke()` for non-success responses
+- Fixed `participant.iconPath` to use correct file path
+- Added API key check in chat participant before retrieval operations
+- Changed post-init prompt to modal dialog (`{ modal: true }`)
+- Added status bar update in `Flowbaby.setApiKey` command handler
+
+## [0.5.6] - 2025-11-30
+
+### Fixed - Plan 045 Hotfix: Smoke Test Issues
+
+**Hotfix Release** - Addresses three issues discovered during v0.5.5 smoke testing.
+
+#### Issues Resolved
+
+1. **Progress notification stuck**: "Initializing Flowbaby databases..." progress notification no longer blocks waiting for user input. Post-init API key prompt now shows after progress completes.
+
+2. **Post-init prompt timing**: API key setup prompt now appears after initialization fully completes, not while progress is still showing.
+
+3. **Configure API Key command not found**: `Flowbaby.configureApiKey` command now works from Command Palette (was only `Flowbaby.setApiKey` before).
+
+#### Technical Changes
+
+- Moved post-init API key prompt outside `withProgress` callback to non-blocking `.then()` pattern
+- Added `Flowbaby.configureApiKey` command as alias to `Flowbaby.setApiKey`
+- Added `getApiKeyState()` method to FlowbabyClient for cached state access
+
+## [0.5.5] - 2025-11-30
+
+### Fixed - Plan 045: Fix Fresh Install API Key Blocking
+
+**Fresh Install Experience Release** - Eliminates API key blocking issue that prevented new users from completing setup.
+
+#### Problem Resolved
+- **Issue**: Fresh installations failed with "LLM_API_KEY not found in environment" error
+- **Impact**: New users couldn't complete Flowbaby setup without already having an API key configured
+- **Root Cause**: `init.py` required API key before user had opportunity to set it
+
+#### Changes
+
+##### Python Bridge (`init.py`)
+- **Modified**: API key validation now logs warning instead of returning error
+- **Added**: `api_key_configured` and `llm_ready` fields to initialization response
+- **Behavior**: Initialization completes successfully, directories and databases created without API key
+
+##### TypeScript Client (`flowbabyClient.ts`)
+- **Added**: `ApiKeyState` interface for centralized API key tracking
+- **Added**: `InitializeResult` interface with success status and API key state
+- **Added**: `hasApiKey()` public method for pre-checking API key availability
+- **Modified**: `initialize()` now returns `InitializeResult` with API key state
+
+##### Status Bar (`FlowbabyStatusBar.ts`)
+- **Added**: `NeedsApiKey` status with distinct key icon and warning background
+- **Behavior**: Shows $(key) icon when initialized but API key not configured
+
+##### Extension Activation (`extension.ts`)
+- **Added**: Post-initialization API key prompt when no key configured
+- **Added**: Graceful handling of `InitializeResult` return type
+- **Behavior**: Shows "Set your API key to enable LLM operations" with action button
+
+##### Graceful Degradation
+- **Added**: Pre-check in `ingestForAgent` and `FlowbabyContextProvider.retrieveContext`
+- **Behavior**: If no API key, prompts user with "Set API Key" action before attempting operation
+- **Message**: "Flowbaby memory operations require an API key."
+
+#### User Experience
+1. Fresh install now completes successfully
+2. Status bar shows key icon indicating API key needed
+3. User prompted to set API key after initialization
+4. Memory operations prompt for API key if not configured
+5. All existing functionality preserved when API key is set
+
+## [0.5.2] - 2025-11-29
+
+### Removed - Plan 044: Remove Non-Functional Auto-Ingest Setting
+
+**Configuration Cleanup Release** - Removes experimental setting that never functioned.
+
+#### Removed
+- **Setting**: `Flowbaby.autoIngestConversations` removed from VS Code settings
+- **Code**: Step 6 "feedback loop" code block removed from chat participant
+- **Rationale**: Feature was introduced as experimental but never worked due to Cognee SDK limitations (file hashing bug). Keeping non-functional settings creates user confusion.
+
+#### Impact
+- Users who had this setting enabled will see no behavior change (it was already non-functional)
+- Configuration surface is now cleaner and only exposes working features
+- Any future auto-ingest or feedback-loop features will be redesigned under the current architecture (e.g., via structured summaries and Flowbaby tools) rather than reusing this removed pattern
+
 ## [0.5.1] - 2025-11-28
 
 ### Changed - Plan 043: Tool Descriptions and UX Improvements
@@ -999,4 +1204,4 @@ All features, improvements, and technical details remain as documented in v0.3.3
 - First conversation in new workspace has no context (memory starts empty)
 - macOS and Linux tested; Windows support may require additional configuration
 
-[0.1.0]: https://github.com/lsalsich/flowbaby/releases/tag/v0.1.0
+[0.1.0]: https://github.com/groupzer0/flowbaby/releases/tag/v0.1.0

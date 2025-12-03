@@ -240,14 +240,12 @@ Starting in v0.3.3, the `Flowbaby.ingestForAgent` command operates **asynchronou
 ### Timing Expectations
 
 **Ingestion Flow Timeline**:
-
-1. **0–5s**: Extension receives `ingestForAgent` command
-2. **5–10s**: Python bridge stages data (`flowbaby.add()`), command returns `success`
-3. **10–100s**: Background subprocess builds knowledge graph (`flowbaby.cognify()`)
+1. **0-5s**: Extension receives `ingestForAgent` command
+2. **5-10s**: Python bridge stages data (`flowbaby.add()`), command returns `success`
+3. **10-100s**: Background subprocess builds knowledge graph (`flowbaby.cognify()`)
 4. **100s**: User receives notification (success or failure toast)
 
 **What This Means for Agents**:
-
 - ✅ Agents can acknowledge ingestion immediately (&lt;10s)
 - ✅ Agents don't block waiting for graph construction
 - ✅ Multiple ingestion requests can be queued
