@@ -78,9 +78,8 @@ jobs:
 
           EOF
           
-          # Extract Installation and Setup sections from README
-          sed -n '/^## Installation$/,/^## Usage$/p' /tmp/README.md | head -n -2 >> docs/getting-started.md
-          sed -n '/^## Setup$/,/^## Usage$/p' /tmp/README.md | head -n -2 >> docs/getting-started.md
+          # Extract Prerequisites, Installation, Setup, and Instructions sections
+          sed -n '/^## Prerequisites$/,/^## Usage$/p' /tmp/README.md | head -n -2 >> docs/getting-started.md
           
       - name: Create configuration.md
         run: |
@@ -95,10 +94,9 @@ jobs:
 
           EOF
           
-          # Extract Configuration and Python Environment sections
-          sed -n '/^### Configuration$/,/^### LLM Configuration$/p' /tmp/README.md | tail -n +2 | head -n -2 >> docs/configuration.md
-          sed -n '/^### LLM Configuration$/,/^## Python Environment$/p' /tmp/README.md | head -n -2 >> docs/configuration.md
-          sed -n '/^## Python Environment$/,/^## Using Flowbaby/p' /tmp/README.md | head -n -2 >> docs/configuration.md
+          # Extract Automatic Detection, Unsupported Contexts, Configuration, LLM Configuration
+          # Promote H3 to H2 for better hierarchy
+          sed -n '/^### Automatic Detection$/,/^## Using Flowbaby Tools with Custom Agents$/p' /tmp/README.md | head -n -2 | sed 's/^### /## /' >> docs/configuration.md
           
       - name: Create workflows.md
         run: |
@@ -113,8 +111,8 @@ jobs:
 
           EOF
           
-          # Extract Usage, Capturing, Retrieving, Summary sections
-          sed -n '/^## Usage$/,/^## For Agent Developers$/p' /tmp/README.md | head -n -2 >> docs/workflows.md
+          # Extract Usage sections (stop before Automatic Detection)
+          sed -n '/^## Usage$/,/^### Automatic Detection$/p' /tmp/README.md | head -n -2 >> docs/workflows.md
           
       - name: Create agent-integration.md
         run: |
@@ -125,7 +123,11 @@ jobs:
 
           EOF
           
-          # Use the dedicated AGENT_INTEGRATION.md file
+          # Extract "Using Flowbaby Tools with Custom Agents" from README
+          sed -n '/^## Using Flowbaby Tools with Custom Agents$/,/^## Troubleshooting$/p' /tmp/README.md | head -n -2 >> docs/agent-integration.md
+          
+          # Append the dedicated AGENT_INTEGRATION.md file
+          echo -e "\n\n---\n\n" >> docs/agent-integration.md
           cat /tmp/AGENT_INTEGRATION.md >> docs/agent-integration.md
           
       - name: Create troubleshooting.md
@@ -141,8 +143,9 @@ jobs:
 
           EOF
           
-          # Extract Troubleshooting, Known Limitations, Known Issues sections
-          sed -n '/^## Troubleshooting$/,/^## Screenshots$/p' /tmp/README.md | tail -n +2 | head -n -2 >> docs/troubleshooting.md
+          # Extract Troubleshooting, Privacy, Known Limitations
+          # Remove the "Troubleshooting" header and promote H3 to H2
+          sed -n '/^## Troubleshooting$/,/^## Screenshots$/p' /tmp/README.md | tail -n +2 | head -n -2 | sed 's/^### /## /' >> docs/troubleshooting.md
           
       - name: Create changelog.md
         run: |
