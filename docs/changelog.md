@@ -11,6 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- markdownlint-disable MD022 MD024 MD032 MD007 MD009 -->
 
+## [0.5.18] - 2025-12-07
+
+### Added
+
+- **Global Shortcut**: `Ctrl/Cmd+Alt+F` now works across VS Code views without focus restrictions, still prompting for capture input when no editor selection is available.
+- **Session Toggle**: New `Flowbaby.sessionManagement.enabled` setting (default on) lets users disable session IDs for stateless interactions.
+- **Dependency Mismatch Notice**: Early hash check marks the workspace as needing setup and prompts to refresh when bridge dependencies are out of date.
+
+### Changed
+
+- **Graph Retriever Debug Gating**: Cognee graph completion debug logs now obey the `Flowbaby.debugLogging` setting to reduce noisy output by default.
+- **Workspace Isolation**: Initialization status is tracked per workspace to avoid a broken workspace contaminating others in the same window.
+
+## [0.5.17] - 2025-12-05
+
+### Added
+
+- **Dependency Enforcement**: Added strict verification of Python environment dependencies. The extension now blocks operations and prompts for updates if `requirements.txt` hashes do not match the installed environment.
+- **Environment Guardrails**: Added `FlowbabySetupService` checks to `FlowbabyContextProvider` and command handlers to prevent crashes from stale dependencies.
+- **Update Modals**: Added user-friendly modals to guide users through updating managed or external environments.
+
+### Changed
+
+- **Verification Logic**: `FlowbabySetupService` now tracks verification state and only allows operations when the environment is fully verified.
+
 ## [0.5.16] - 2025-12-05
 
 ### Fixed
