@@ -11,6 +11,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- markdownlint-disable MD022 MD024 MD032 MD007 MD009 -->
 
+## [0.5.20] - 2025-12-10
+
+### Fixed
+
+- **Tool Registration Guards**: Fixed over-aggressive guard logic that incorrectly set `setToolsRegistered(true)` based on host inventory presence rather than actual registration outcomes. Guards now follow evidence-only semantics per architecture invariant 4.2.
+- **All-or-Nothing Tool Set Registration**: Tool registration now treats both `flowbaby_storeMemory` and `flowbaby_retrieveMemory` as an atomic unit—the guard is only set if all tools register successfully or return known duplicate errors.
+- **Copilot Tool Availability**: Resolved issue where Flowbaby tools would not appear in GitHub Copilot's tool list after non-initial activations because guards were being set prematurely.
+
+### Added
+
+- **Duplicate Error Classifiers**: Added `isKnownDuplicateToolError()` and `isKnownDuplicateParticipantError()` helper functions to centralize error classification and provide forward-compatible matching for VS Code API changes.
+- **Host Tool Snapshots**: Added `createHostToolSnapshot()` for compact diagnostic snapshots of registered tools (observational only, does not affect guard state per invariant 4.3.1).
+- **Plan 056 Test Suite**: Added comprehensive tests for guard behavior, duplicate-error classification, tool/participant independence (invariant 4.5.4), and evidence-only semantics.
+
+### Changed
+
+- **Participant Registration**: Updated `registerFlowbabyParticipant()` to use centralized `isKnownDuplicateParticipantError()` classifier and moved guard setting to immediately after successful registration.
+- **Guard Lifecycle**: Registration guards are now completely independent—tool guard state does not affect participant guard state and vice versa, ensuring one subsystem's registration issues don't block the other.
+
+## [0.5.19] - 2025-12-07
+
+### Added
+
+- Activation ledger now records workspace path, health/requirements state, registration guards, and deactivation details for every activation, enabling lifecycle reconstruction across test runs.
+- Structured safePush diagnostics capture context fingerprints, host tool snapshots, and test-mode push probes so DisposableStore anomalies can be attributed to specific intents.
+- Workspace initialization isolation from Plan 050 is preserved under repeated activations, with each workspace tracked independently so a broken workspace cannot contaminate others sharing the same window or host.
+- Single-activation lifecycle model from Plan 051 is enforced via registration helpers and activation ledger state, ensuring that extension-owned registrations are routed through lifecycle-safe paths and never pushed into known-disposed contexts.
+
+### Changed
+
+- Language model tool and chat participant registration skip when host inventory already contains Flowbaby assets, reducing duplicate registration noise in reused test hosts.
+- Test-mode prompt handling now logs suppression reasons with activation metadata and avoids modal dialogs that block CI runs.
+- Debug logging automatically enables in test mode to surface lifecycle and registration traces during automated suites.
+
 ## [0.5.18] - 2025-12-07
 
 ### Added
