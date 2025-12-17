@@ -46,15 +46,23 @@ Flowbaby now manages its own Python environment automatically.
 
 ### 2. Configure API Key
 
-**Global API Key (Stored Securely)**
+Flowbaby needs an **LLM provider API key** (OpenAI, Anthropic, etc.) for memory operations:
 
-Use the built-in command to set your API key once, securely stored via VS Code's SecretStorage:
+| What the API key does | What it does NOT do |
+|----------------------|--------------------|
+| ✅ Embed memories into searchable vectors | ❌ No telemetry or analytics |
+| ✅ Retrieve relevant context via semantic search | ❌ No code analysis |
+| ✅ Summarize conversations for long-term storage | ❌ Never transmitted except to your LLM provider |
+
+> 💰 **Cost**: With default settings (OpenAI gpt-4o-mini), typical usage costs **$0.02–$0.06 per day** (~2-6 US cents). Your experience may vary. You can change providers/models in Settings → Flowbaby.
+
+**Set your API key (stored securely via VS Code SecretStorage):**
 
 1. Open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 2. Run **"Flowbaby: Set API Key"**
-3. Enter your API key when prompted
+3. Enter your LLM provider API key when prompted
 
-This stores the key securely and applies to all workspaces automatically.
+This key is stored securely and applies to all workspaces automatically.
 
 ### 3. Verify Extension Activation
 
@@ -64,7 +72,11 @@ This stores the key securely and applies to all workspaces automatically.
 
 ## Memory-Aware Copilot Instructions (Strong Defaults)
 
-To get the full value from Flowbaby, you don’t have to start from scratch with custom prompting-Flowbaby already nudges GitHub Copilot to store and retrieve memory when it makes sense. However, strong Copilot instructions are still important if you want Copilot-initiated memory storage and retrieval to match your workflow (what to remember, what to ignore, how aggressive to be). The template below is a recommended starting point you can customize.
+> ⚠️ **Important**: Without explicit instructions, Copilot may not use memory tools in the way you desire. Adding a memory contract to your workspace ensures Copilot proactively stores and retrieves memories.
+>
+> 📄 **Quick option**: Copy the [memory contract example](https://github.com/groupzer0/vs-code-agents/blob/main/vs-code-agents/reference/memory-contract-example.md) to your workspace as `.copilot-instructions.md`
+
+Flowbaby already nudges GitHub Copilot to store and retrieve memory when it makes sense. However, strong Copilot instructions are important if you want Copilot-initiated memory storage and retrieval to match your workflow (what to remember, what to ignore, how aggressive to be). The template below is a recommended starting point you can customize.
 
 Create or modify an `.agent.md`, `.chatmode.md` or `.copilot-instructions.md` file in your workspace and add something like the example below, or use it exactly as-is.
 
