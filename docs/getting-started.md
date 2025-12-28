@@ -39,7 +39,7 @@ Flowbaby now manages its own Python environment automatically.
 1. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 2. Run **"Flowbaby: Initialize Workspace"**
 3. The extension will:
-   - Check for Python 3.8+
+   - Check for Python 3.10-3.12
    - Create a dedicated `.flowbaby/venv` in your workspace (isolated from project venvs)
    - Install `cognee` and dependencies
    - Verify the environment is ready

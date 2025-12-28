@@ -46,7 +46,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 - Check that `Flowbaby.logLevel` is not set to `"debug"` (this slows down operations)
 - Reduce `maxContextResults` to 1-2 for faster retrieval
 - Reduce `maxContextTokens` to 1000 for lighter processing
- - If the Python bridge daemon is unstable in your environment, switch `Flowbaby.bridgeMode` to `"spawn"` to fall back to the legacy per-request process model.
+- If the Python bridge daemon is unstable in your environment, switch `Flowbaby.bridgeMode` to `"spawn"` to fall back to the legacy per-request process model.
 
 #### 5. Capture or Retrieval Not Working
 
@@ -66,7 +66,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 5. Each workspace has separate memory-switching workspaces means different context
 6. If retrieval fails, you'll see "⚠️ Memory retrieval unavailable" but participant continues without context
 
-**Note**: Auto-detection works for standard `.venv` setups on Linux, macOS, and Windows. For remote contexts (Remote-SSH, WSL, Dev Containers), conda, or pyenv, use explicit `Flowbaby.pythonPath` configuration.
+**Note**: Auto-detection prefers a workspace-managed `.flowbaby/venv` when present. For remote contexts (Remote-SSH, WSL, Dev Containers), conda, pyenv, or other non-standard setups, use an explicit `Flowbaby.pythonPath`.
 
 ## Clearing Memory
 
@@ -93,5 +93,5 @@ rm -rf .flowbaby/ .flowbaby/system/ .flowbaby/data/  # In workspace root
 ## Known Limitations
 
 - **Workspace Required** - Extension doesn't work in single-file mode
-- **Python Dependency** - Requires Python 3.8+ on your system; Cognee and dependencies are installed automatically in an isolated environment
+- **Python Dependency** - Requires Python 3.10-3.12 on your system; Cognee and dependencies are installed automatically in an isolated environment
 - **Platform Support** - Primarily tested on macOS and Linux; Windows support may require additional configuration
