@@ -11,6 +11,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- markdownlint-disable MD022 MD024 MD032 MD007 MD009 -->
 
+## [0.6.2] - 2025-12-20
+
+### Added
+
+- **Copilot Synthesis Model Selection (Plan 075)**: New `Flowbaby.synthesis.modelId` setting allows users to choose which Copilot model performs memory retrieval synthesis. Options include GPT-5 mini (default), GPT-4o, and GPT-4.1. Synthesis fails with a clear, actionable error if the selected model is unavailable—no silent fallback to a different model.
+- **Settings Clarity (Plan 075)**: Updated settings descriptions to clearly distinguish:
+  - `Flowbaby.synthesis.modelId`: Controls Copilot synthesis model for memory retrieval
+  - `Flowbaby.llm.*`: Controls Python bridge LLM for memory ingestion and graph operations (does NOT affect Copilot synthesis)
+- **Rebuild Tool Batch Processing & Resilience (Plan 076)**: The developer/tester rebuild CLI tool (`rebuild_workspace.py`) now supports robust filesystem-based rebuild with:
+  - **Batch ingestion**: Configurable batch size (`--batch-size`) with rate limiting (`--batch-delay`) for API quota management
+  - **Checkpointing & resumability**: JSON checkpoints with SHA-256 input fingerprinting allow resuming interrupted operations (`--resume`) or starting fresh (`--restart`)
+  - **Preflight/dry-run mode**: `--dry-run` shows file counts, total size, and skip reasons without making changes
+  - **Fail-closed semantics**: Destructive `reset-and-rebuild` mode validates all inputs before resetting stores; aborts on encoding errors or permission issues
+  - **Concurrent writer detection**: Refuses to run when daemon mode is active to prevent data corruption
+  - **File size limits**: Configurable maximum file size (`--max-file-size`, default 10MB) with override (`--allow-oversized`)
+
+### Changed
+
+- **Extension Activation Refactor (Plan 062)**: Decomposed the 2066 LOC `extension.ts` monolith into three cohesive modules: `extension.ts` (267 LOC orchestrator), `activation/registrations.ts` (1175 LOC for commands, LM tools, chat participant), and `activation/init.ts` (797 LOC for initialization, health checks, setup commands). No user-facing changes; architecture maintainability improvement only.
+
+### Fixed
+
+- **Notification Observability (Plan 075)**: Removed temporary diagnostic logging from toast notification code paths, keeping production logs clean while preserving notification functionality.
+- **Daemon Idle-Timeout KuzuDB Locks (Plan 061)**: Fixed aggressive SIGKILL escalation during idle-timeout shutdown that left KuzuDB `.pkl` file locks orphaned. The daemon manager now uses a 3-phase graceful shutdown (5s graceful → 3s SIGTERM → SIGKILL as last resort), allowing Cognee/KuzuDB time to release locks cleanly. Added operational fallback: after 3 consecutive forced kills, daemon mode automatically suspends and falls back to spawn-per-request until manually re-enabled.
+- **Memory Ingestion KuzuDB Lock Conflicts (Plan 062)**: Fixed `flowbaby_storeMemory` tool failures with "Could not set lock on file" errors. Memory ingestion now routes through the daemon process (which holds the single KuzuDB connection) instead of spawning a separate subprocess that would conflict with the daemon's lock. Both `ingestSummary()` and `ingestSummaryAsync()` now use daemon-based ingestion when daemon mode is enabled, with fallback to subprocess when daemon is unavailable.
+
+### Changed
+
+- **Cognee Upgrade to 0.5.1 (Plan 059)**: Upgraded from Cognee 0.4.1 to 0.5.1 to enable filesystem-backed session caching. Cognee 0.5.0+ introduces `CACHE_BACKEND=fs` via diskcache (bundled), removing the implicit Redis dependency that caused connection failures in managed environments without Redis installed.
+- **Filesystem Cache Backend Default**: Managed environments now default to `CACHING=true` and `CACHE_BACKEND=fs` (filesystem session cache) instead of falling back to Redis. This eliminates Redis-related timeout errors and improves retrieval reliability out-of-the-box.
+- **Environment Variable Precedence**: Cache configuration now respects explicit user-provided environment variables (`CACHING`, `CACHE_BACKEND`). Flowbaby-managed defaults are only applied when values are not already set.
+- **Daemon Default Idle Timeout**: Increased default idle timeout from 5 minutes to 30 minutes to reduce daemon restart frequency during normal development sessions.
+
+### Added
+
+- **Cache Configuration Logging**: All bridge entry points (daemon, init, ingest, retrieve) now log cache configuration at startup for improved observability and troubleshooting.
+- **Automatic Schema Migration (Plan 060)**: Databases created with Cognee 0.4.x are automatically migrated to 0.5.x schema on initialization. The migration adds required columns for multi-tenant support (`datasets.tenant_id` and 10 `dataset_database` columns) using additive-only `ALTER TABLE` operations. No data loss occurs.
+  - **Fail-Closed Safety**: If schema migration fails, initialization fails cleanly rather than proceeding with an incompatible database.
+  - **Receipt Generation**: Migration attempts are logged to `.flowbaby/system/schema_migration_receipt.json` for auditability.
+  - **External Repair**: Users with external Python environments can run `python bridge/migrate_cognee_0_5_schema.py <workspace> --dry-run` to check schema status and apply migrations manually.
+- **Daemon Startup Hygiene (Plan 061)**: Added stale PID file cleanup and orphan process detection on daemon startup to prevent ghost daemon accumulation and ensure clean daemon lifecycle management.
+
 ## [0.6.1] - 2025-12-13
 
 ### Changed

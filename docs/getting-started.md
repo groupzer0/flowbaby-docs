@@ -70,6 +70,16 @@ This key is stored securely and applies to all workspaces automatically.
 2. If you see **"Flowbaby: Setup Required"** (yellow warning), click it to run setup
 3. Optional: Open the Output panel (**View → Output**) and select **"Flowbaby"** to see logs
 
+## Windows Troubleshooting
+
+### Refresh dependencies fails with EPERM (rename `.flowbaby\\venv`)
+
+If **"Flowbaby: Refresh Bridge Dependencies"** fails with an `EPERM` rename error on Windows, a Python process is usually still running and holding a lock inside `.flowbaby\\venv` (often the bridge daemon).
+
+- Reload the window (**Developer: Reload Window**) and retry
+- Close VS Code fully (all windows), wait a moment, then retry
+- As a last resort, stop the `python.exe` process that references `.flowbaby\\venv` in its command line
+
 ## Memory-Aware Copilot Instructions (Strong Defaults)
 
 > ⚠️ **Important**: Without explicit instructions, Copilot may not use memory tools in the way you desire. Adding a memory contract to your workspace ensures Copilot proactively stores and retrieves memories.

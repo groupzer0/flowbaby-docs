@@ -141,6 +141,16 @@ This key is stored securely and applies to all workspaces automatically.
 2. If you see **"Flowbaby: Setup Required"** (yellow warning), click it to run setup
 3. Optional: Open the Output panel (**View → Output**) and select **"Flowbaby"** to see logs
 
+## Windows Troubleshooting
+
+### Refresh dependencies fails with EPERM (rename `.flowbaby\\venv`)
+
+If **"Flowbaby: Refresh Bridge Dependencies"** fails with an `EPERM` rename error on Windows, a Python process is usually still running and holding a lock inside `.flowbaby\\venv` (often the bridge daemon).
+
+- Reload the window (**Developer: Reload Window**) and retry
+- Close VS Code fully (all windows), wait a moment, then retry
+- As a last resort, stop the `python.exe` process that references `.flowbaby\\venv` in its command line
+
 ## Memory-Aware Copilot Instructions (Strong Defaults)
 
 > ⚠️ **Important**: Without explicit instructions, Copilot may not use memory tools in the way you desire. Adding a memory contract to your workspace ensures Copilot proactively stores and retrieves memories.
@@ -386,6 +396,8 @@ Access settings via **File → Preferences → Settings → Extensions → Flowb
 | `Flowbaby.maxContextTokens` | Maximum token budget for retrieved context (higher values may increase latency and memory usage) | `32000` |
 | `Flowbaby.searchTopK` | Maximum number of candidates to request from the Flowbaby search engine before ranking (normalized to be ≥ `maxContextResults`, hard-capped at 100) | `10` |
 | `Flowbaby.ranking.halfLifeDays` | Recency half-life (in days) used for ranking; older memories past this window have their relevance score halved | `7` |
+| `Flowbaby.bridgeMode` | Bridge execution mode: `daemon` (default, long‑lived Python process for faster requests) or `spawn` (legacy per‑request process; useful for troubleshooting daemon issues) | `daemon` |
+| `Flowbaby.daemonIdleTimeoutMinutes` | Minutes of inactivity before the bridge daemon exits; lower values save memory, higher values keep the daemon warm at the cost of a long‑lived process | `5` |
 | `flowbaby.notifications.showIngestionSuccess` | Show toast notifications when memory ingestion completes successfully (errors are always shown) | `true` |
 | `Flowbaby.pythonPath` | Python interpreter to use for the Flowbaby bridge; leave as `python3` for auto-detection of workspace `.venv`, or set an explicit path | `python3` |
 | `Flowbaby.logLevel` | Logging verbosity level: `error`, `warn`, `info`, or `debug` | `info` |
@@ -484,7 +496,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 
 #### 2. "Python not found" or "cognee module not found"
 
-**Solution**: 
+**Solution**:
 
 - Run **"Flowbaby: Initialize Workspace"** to set up the environment automatically
 - If using a custom Python environment, set `Flowbaby.pythonPath` to your Python path
@@ -503,6 +515,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 - Check that `Flowbaby.logLevel` is not set to `"debug"` (this slows down operations)
 - Reduce `maxContextResults` to 1-2 for faster retrieval
 - Reduce `maxContextTokens` to 1000 for lighter processing
+ - If the Python bridge daemon is unstable in your environment, switch `Flowbaby.bridgeMode` to `"spawn"` to fall back to the legacy per-request process model.
 
 #### 5. Capture or Retrieval Not Working
 
@@ -528,7 +541,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 
 To reset your workspace memory (e.g., to start fresh or clear sensitive data):
 
-Use `Flowbaby: Clear Workspace Memory` command from the command pallette. This moves your current data to .flowbaby/.trash until you decide to delete it permanently. 
+Use `Flowbaby: Clear Workspace Memory` command from the command pallette. This moves your current data to .flowbaby/.trash until you decide to delete it permanently.
 
 The extension will reinitialize on next activation, creating a fresh knowledge graph.
 
@@ -595,7 +608,7 @@ This extension uses [Cognee](https://github.com/topoteretes/cognee) under the Ap
 
 ## Changelog
 
-See [CHANGELOG.md](./changelog) for version history and release notes. 
+See [CHANGELOG.md](./changelog) for version history and release notes.
 
 ---
 

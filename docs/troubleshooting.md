@@ -27,7 +27,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 
 #### 2. "Python not found" or "cognee module not found"
 
-**Solution**: 
+**Solution**:
 
 - Run **"Flowbaby: Initialize Workspace"** to set up the environment automatically
 - If using a custom Python environment, set `Flowbaby.pythonPath` to your Python path
@@ -46,6 +46,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 - Check that `Flowbaby.logLevel` is not set to `"debug"` (this slows down operations)
 - Reduce `maxContextResults` to 1-2 for faster retrieval
 - Reduce `maxContextTokens` to 1000 for lighter processing
+ - If the Python bridge daemon is unstable in your environment, switch `Flowbaby.bridgeMode` to `"spawn"` to fall back to the legacy per-request process model.
 
 #### 5. Capture or Retrieval Not Working
 
@@ -71,7 +72,7 @@ Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
 
 To reset your workspace memory (e.g., to start fresh or clear sensitive data):
 
-Use `Flowbaby: Clear Workspace Memory` command from the command pallette. This moves your current data to .flowbaby/.trash until you decide to delete it permanently. 
+Use `Flowbaby: Clear Workspace Memory` command from the command pallette. This moves your current data to .flowbaby/.trash until you decide to delete it permanently.
 
 The extension will reinitialize on next activation, creating a fresh knowledge graph.
 

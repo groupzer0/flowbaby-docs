@@ -30,6 +30,8 @@ Access settings via **File → Preferences → Settings → Extensions → Flowb
 | `Flowbaby.maxContextTokens` | Maximum token budget for retrieved context (higher values may increase latency and memory usage) | `32000` |
 | `Flowbaby.searchTopK` | Maximum number of candidates to request from the Flowbaby search engine before ranking (normalized to be ≥ `maxContextResults`, hard-capped at 100) | `10` |
 | `Flowbaby.ranking.halfLifeDays` | Recency half-life (in days) used for ranking; older memories past this window have their relevance score halved | `7` |
+| `Flowbaby.bridgeMode` | Bridge execution mode: `daemon` (default, long‑lived Python process for faster requests) or `spawn` (legacy per‑request process; useful for troubleshooting daemon issues) | `daemon` |
+| `Flowbaby.daemonIdleTimeoutMinutes` | Minutes of inactivity before the bridge daemon exits; lower values save memory, higher values keep the daemon warm at the cost of a long‑lived process | `5` |
 | `flowbaby.notifications.showIngestionSuccess` | Show toast notifications when memory ingestion completes successfully (errors are always shown) | `true` |
 | `Flowbaby.pythonPath` | Python interpreter to use for the Flowbaby bridge; leave as `python3` for auto-detection of workspace `.venv`, or set an explicit path | `python3` |
 | `Flowbaby.logLevel` | Logging verbosity level: `error`, `warn`, `info`, or `debug` | `info` |
