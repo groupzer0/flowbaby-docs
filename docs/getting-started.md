@@ -46,23 +46,23 @@ Flowbaby now manages its own Python environment automatically.
 
 ### 2. Configure API Key
 
-Flowbaby needs an **LLM provider API key** (OpenAI, Anthropic, etc.) for memory operations:
+### 2. Authenticate with Flowbaby Cloud
 
-| What the API key does | What it does NOT do |
-|----------------------|--------------------|
+Flowbaby v0.7.0+ uses **Flowbaby Cloud** for LLM operations:
+
+| What Flowbaby Cloud provides | What it does NOT do |
+|----------------------|--------------------||
 | ✅ Embed memories into searchable vectors | ❌ No telemetry or analytics |
 | ✅ Retrieve relevant context via semantic search | ❌ No code analysis |
-| ✅ Summarize conversations for long-term storage | ❌ Never transmitted except to your LLM provider |
+| ✅ Summarize conversations for long-term storage | ❌ Your data stays on your machine |
 
-> 💰 **Cost**: With default settings (OpenAI gpt-4o-mini), typical usage costs **$0.02–$0.06 per day** (~2-6 US cents). Your experience may vary. You can change providers/models in Settings → Flowbaby.
-
-**Set your API key (stored securely via VS Code SecretStorage):**
+**Login to Flowbaby Cloud:**
 
 1. Open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-2. Run **"Flowbaby: Set API Key"**
-3. Enter your LLM provider API key when prompted
+2. Run **"Flowbaby Cloud: Login"**
+3. Complete authentication in your browser
 
-This key is stored securely and applies to all workspaces automatically.
+Your Cloud session applies to all workspaces automatically.
 
 ### 3. Verify Extension Activation
 

@@ -19,11 +19,11 @@ Common issues and solutions for Flowbaby.
 
 **Common Issues**:
 
-#### 1. "LLM_API_KEY not found"
+#### 1. "Cloud credentials not found" or "NOT_AUTHENTICATED"
 
-**Solution**: Use the **"Flowbaby: Set API Key"** command
+**Solution**: Run **"Flowbaby Cloud: Login"** command
 
-Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"**
+Then reload VS Code: `Ctrl+Shift+P` → **"Reload Window"****
 
 #### 2. "Python not found" or "cognee module not found"
 
