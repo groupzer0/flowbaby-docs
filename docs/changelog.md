@@ -23,6 +23,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Preferred Region Dropdown (Plan 091)**: The `Flowbaby Cloud: Preferred Region` setting now renders as a dropdown in VS Code Settings instead of a freeform text input:
+  - Dropdown displays all supported Bedrock regions (us-east-1, us-west-2, eu-west-1, eu-central-1, ap-northeast-1, ap-northeast-2, ap-southeast-2, ap-south-1)
+  - First option "Backend default (recommended)" selects the backend's default region
+  - New `npm run check:regions` script validates enum matches API contract allowlist at build time
+
+- **Accurate Credit Consumption (Plan 090)**: Credits are now charged per successful Bedrock operation rather than at vend time, ensuring users only pay for completed operations:
+  - New `consume()` method in FlowbabyCloudClient calls `POST /usage/consume` endpoint
+  - Metering wired after successful retrieve operations (both synthesis and legacy paths)
+  - Metering wired after successful ingest operations (sync summary, sync conversation, and async cognify paths)
+  - Idempotent billing via `X-Idempotency-Key` header prevents duplicate charges on retries
+  - Fire-and-forget pattern: consume failures logged but never block user operations
+  - DIP-compliant metering abstraction (`IUsageMeter`) keeps Cloud concerns isolated from core paths
+
+- **Bedrock Health Check Module (Plan 088)**: New `bedrock_health.py` module provides deterministic Bedrock connectivity validation using configuration proven stable in Analysis 088:
+  - Uses `TextOut` Pydantic response model (not `response_model=str` which is unstable)
+  - Strict JSON instruction prompt achieving 20/20 clean responses in batch testing
+  - System-first message ordering for improved adherence
+  - `max_completion_tokens=2048` to prevent Bedrock 400 validation errors
+  - Actionable error messages with remediation guidance for auth, model, and network failures
+
+- **Cognee Probe Bypass (Plan 088)**: New `cognee_probe_bypass.py` module prevents add-only ingestion failures caused by Cognee's internal LLM probe:
+  - Sets `_first_run_done=True` on Cognee's setup module to skip `test_llm_connection()`
+  - Bridge-side health check (`bedrock_health.py`) serves as authoritative connectivity validation
+  - Embedding validation deferred to first-use with clear error handling
+
 - **Cloud Readiness Service (Plan 087)**: Unified Cloud readiness state management with three-axis model (auth/vend/bridge) and throttled error display. Eliminates misleading login prompts when user is authenticated but vending fails.
   - **Structured readiness model**: `AuthReadinessState`, `VendReadinessState`, `BridgeReadinessState` with `CloudOverallStatus` (ready/login_required/degraded/error)
   - **Error throttling**: Vend failures surface via toast with 30s min interval and max 3 per 5 minutes to prevent notification spam
@@ -49,6 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **API Contract Package Migration (Plan 089)**: Migrated from repo-local contract copies to the canonical `@groupzer0/flowbaby-api-contract@3.1.0` npm package. Contract types, constants, and helpers are now imported from the versioned package, eliminating copy/sync drift and ensuring extension/backend stay aligned via explicit semver'd dependency. Retired `.github/workflows/sync-contract.yml` and `extension/src/flowbaby-cloud/contract/` local copy.
+
 - **Activation Prompt Gating (Plan 087)**: Post-init prompts now use `CloudReadinessService.needsLogin()` instead of legacy `llmReady` flag. Login prompts only appear when user genuinely needs to authenticate—not when already authenticated but vending is failing.
 
 - **Status Bar Driven by Cloud Readiness (Plan 087)**: Status bar icon and text now reflect the unified `CloudOverallStatus` state. When vend fails for an authenticated user, shows "degraded" state with appropriate guidance instead of misleading "login required".
@@ -69,6 +96,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Walkthrough Updated (Plan 083 M6)**: Getting Started walkthrough step changed from "Set Your API Key" to "Login to Flowbaby Cloud" with updated description.
 
 ### Fixed
+
+- **Graph Visualization "No Data" Despite Data Existing (Plan 091)**: Fixed issue where `Flowbaby: Visualize Memory Graph` would show "No graph data available" in the browser even when memories had been ingested. The visualization script now uses the shared environment wiring contract (`bridge_env.apply_workspace_env()`) to ensure it reads from the correct workspace-local database.
+  - Added fail-closed empty-graph detection: the command now returns a clear error instead of a misleading success toast when the generated graph is empty
+  - Distinguishes between "no data ingested" and "data exists but read from wrong store" scenarios
+  - TypeScript command updated to show warnings for empty-graph errors
+
+- **Bedrock Add-Only Ingest Failures (Plan 088)**: Fixed add-only memory ingestion failures caused by Cognee's internal LLM probe using unstable Bedrock structured-output configuration. The probe used `response_model=str` which fails intermittently with `InstructorRetryException`. Now bypassed in favor of a deterministic bridge-side health check.
+
+- **Missing boto3 Dependency (Plan 088)**: Added `boto3` to bridge requirements and verification. Existing workspaces that were missing boto3 (which caused silent litellm failures) can now be detected and remediated via dependency refresh.
 
 - **Misleading Login Prompts After Vend Failures (Plan 087)**: Fixed issue where users who were authenticated but experienced credential vending failures would be repeatedly prompted to log in. The extension now correctly distinguishes between "not logged in" and "logged in but vend failing" states, showing appropriate guidance for each.
 
