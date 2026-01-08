@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- markdownlint-disable MD022 MD024 MD032 MD007 MD009 -->
 
-## [0.7.0] - Unreleased
+## [0.7.0] - 2026-01-07
 
 ### ⚠️ Breaking Changes
 
@@ -81,6 +81,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Status Bar Driven by Cloud Readiness (Plan 087)**: Status bar icon and text now reflect the unified `CloudOverallStatus` state. When vend fails for an authenticated user, shows "degraded" state with appropriate guidance instead of misleading "login required".
 
 - **Vend Errors Now User-Visible (Plan 087)**: All three Python bridge code paths (`FlowbabyClient`, `PythonBridgeDaemonManager`, `BackgroundOperationManager`) now surface vend failures via throttled toast notifications with actionable remediation guidance.
+
+- **Memory Storage Reliability Improvements (Plan 092)**: Enhanced resilience for memory ingestion operations with multiple fixes addressing transient failures:
+  - **Credential Refresh Manager Integration**: Daemon now restarts automatically when Cloud credentials are refreshed, preventing stale credential errors during long sessions
+  - **Exclusive Daemon Locking**: File-based lock mechanism prevents duplicate daemon instances, eliminating Kuzu DB lock contention errors
+  - **Staging Auto-Retry**: `ingestSummaryAsync()` now automatically retries on transient errors (ECONNRESET, ETIMEDOUT, EPIPE, network errors) with configurable retry count and delay
+  - **Cognify Auto-Retry**: Background cognify operations automatically retry via subprocess path when daemon fails, with retry count tracking and delay
 
 - **Cloud API Endpoint Resolution (Plan 084)**: Updated default Cloud API endpoint from placeholder `api.flowbaby.dev` to correct staging endpoint `api-staging.flowbaby.ai`. Endpoint resolution now follows clear precedence: VS Code setting > `FLOWBABY_CLOUD_API_URL` environment variable > built-in default. This enables reliable Cloud connectivity for v0.7.0 launch.
 
